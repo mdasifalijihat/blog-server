@@ -3,6 +3,7 @@ import { postRouter } from "./modules/post/post.router";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import cors from "cors";
+import { commentRouter } from "./modules/comment/commentRouter";
 
 const app = express();
 app.use(
@@ -13,9 +14,14 @@ app.use(
 );
 app.use(express.json());
 
+// auth router login
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
+// post router
 app.use("/posts", postRouter);
+
+// comment router
+app.use("/comments", commentRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
