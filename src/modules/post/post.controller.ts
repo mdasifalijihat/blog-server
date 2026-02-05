@@ -77,7 +77,29 @@ const getAllPost = async (req: Request, res: Response) => {
   }
 };
 
+// get post by id
+const getPostById = async (req: Request, res: Response) => {
+  try {
+    const { postId } = req.params;
+    // if (!postId) {
+    //   throw new Error("Post Id is required!");
+    // }
+    if (!postId || Array.isArray(postId)) {
+      return res.status(400).json({ error: "Invalid post id" });
+    }
+
+    const result = await postService.getPostById(postId);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "post get faild",
+      details: error,
+    });
+  }
+};
+
 export const postController = {
   createPost,
   getAllPost,
+  getPostById,
 };
