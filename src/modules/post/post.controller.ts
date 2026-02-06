@@ -1,31 +1,26 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helper/paginationSortingHelper";
 import { UserRole } from "../../middlewares/auth";
-import { boolean } from "better-auth";
+import AppError from "../../middlewares/appErrors";
 
 // create post
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(400).json({
-        error: "Unauthorized",
-      });
+      throw new AppError("Unauthorized", 401);
     }
     const result = await postService.createPost(req.body, user.id as string);
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "post create faild",
-      details: error,
-    });
+    next(error);
   }
 };
 
 // get all post
-const getAllPost = async (req: Request, res: Response) => {
+const getAllPost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // search option
     const { search } = req.query;
@@ -72,53 +67,56 @@ const getAllPost = async (req: Request, res: Response) => {
     });
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({
-      error: "post get faild",
-      details: error,
-    });
+    next(error);
   }
 };
 
 // get post by id
-const getPostById = async (req: Request<{ postId: string }>, res: Response) => {
+const getPostById = async (
+  req: Request<{ postId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { postId } = req.params;
     if (!postId) {
-      return res.status(400).json({ error: "Post Id is required" });
+      throw new AppError("Unauthorized", 401);
     }
     const result = await postService.getPostById(postId);
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "post get faild",
-      details: error,
-    });
+    next(error);
   }
 };
 
 // get my post
-const getMyPost = async (req: Request<{ postId: string }>, res: Response) => {
+const getMyPost = async (
+  req: Request<{ postId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      throw new AppError("Unauthorized", 401);
     }
     const result = await postService.getMyPost(user.id);
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "My post get failed",
-      details: error,
-    });
+    next(error);
   }
 };
 
 // update user post
-const updatePost = async (req: Request<{ postId: string }>, res: Response) => {
+const updatePost = async (
+  req: Request<{ postId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      throw new AppError("Unauthorized", 401);
     }
 
     const { postId } = req.params;
@@ -131,18 +129,19 @@ const updatePost = async (req: Request<{ postId: string }>, res: Response) => {
     );
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "Post update failed",
-      details: error,
-    });
+    next(error);
   }
 };
 // update user post
-const deletePost = async (req: Request<{ postId: string }>, res: Response) => {
+const deletePost = async (
+  req: Request<{ postId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      throw new AppError("Unauthorized", 401);
     }
 
     const { postId } = req.params;
@@ -154,22 +153,20 @@ const deletePost = async (req: Request<{ postId: string }>, res: Response) => {
     );
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "Post deleted failed",
-      details: error,
-    });
+    next(error);
   }
 };
 // update user post
-const getStats = async (req: Request<{ postId: string }>, res: Response) => {
+const getStats = async (
+  req: Request<{ postId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await postService.getStats();
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "Post deleted failed",
-      details: error,
-    });
+    next(error);
   }
 };
 

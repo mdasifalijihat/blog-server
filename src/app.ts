@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import cors from "cors";
 import { commentRouter } from "./modules/comment/commentRouter";
+import errorHandler from "./middlewares/globalErrorHandler";
 
 const app = express();
 app.use(
@@ -26,4 +27,6 @@ app.use("/comments", commentRouter);
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+app.use(errorHandler);
 export default app;
