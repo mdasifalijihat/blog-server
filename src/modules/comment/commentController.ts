@@ -82,11 +82,16 @@ const updateComment = async (req: Request, res: Response) => {
 const moderateComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
-    const result = await commentServices.moderateComment(commentId as string, req.body);
+    const result = await commentServices.moderateComment(
+      commentId as string,
+      req.body,
+    );
     res.status(201).json(result);
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Comment update failed!";
     res.status(400).json({
-      error: " comment update faild get filed",
+      error: errorMessage,
       details: error,
     });
   }
