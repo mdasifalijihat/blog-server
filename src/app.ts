@@ -16,20 +16,23 @@ app.use(
 );
 app.use(express.json());
 
-// auth router login
+// auth routes
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
-// post router
+// api routes
 app.use("/posts", postRouter);
-
-// comment router
 app.use("/comments", commentRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+// health check
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Blog Server API is running 🚀",
+  });
 });
 
+// error handlers
 app.use(notFound);
-
 app.use(errorHandler);
+
 export default app;
