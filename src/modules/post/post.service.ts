@@ -5,6 +5,7 @@ import {
 } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middlewares/auth";
 
 // post create
 const createPost = async (
@@ -290,7 +291,6 @@ const updatePost = async (
 };
 
 // user post deletede
-
 const deletePost = async (
   postId: string,
   authorId: string,
@@ -317,6 +317,83 @@ const deletePost = async (
   });
 };
 
+// dashboard
+
+const getStats = async () => {
+  // postCOunt, publishedPosts, draftPosts, totalCOmments, totalviews
+  return await prisma.$transaction(async (tx) => {
+    const [
+      totalPosts,
+      publishedPosts,
+      draftPosts,
+      archivedPosts,
+      totalComments,
+      aprovedComment,
+      totalUser,
+      adminCount,
+      userCount,
+      totalViews,
+    ] = await Promise.all([
+      tx.post.count(),
+
+      tx.post.count({
+        where: { status: PostStatus.PUBLISHED },
+      }),
+
+      tx.post.count({
+        where: { status: PostStatus.DRAFT },
+      }),
+
+      tx.post.count({
+        where: { status: PostStatus.ARCHIVED },
+      }),
+
+      tx.comment.count(),
+
+      tx.comment.count({
+        where: { status: CommentStatus.APPROVED },
+      }),
+
+      tx.user.count(),
+
+      tx.user.count({
+        where: { role: UserRole.ADMIN },
+      }),
+
+      tx.user.count({
+        where: { role: UserRole.USER },
+      }),
+
+      tx.post.aggregate({
+        _sum: {
+          views: true,
+        },
+      }),
+      tx.post.aggregate({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+        _sum: {
+          views: true,
+        },
+      }),
+    ]);
+
+    return {
+      totalPosts,
+      publishedPosts,
+      draftPosts,
+      archivedPosts,
+      totalComments,
+      aprovedComment,
+      totalUser,
+      adminCount,
+      userCount,
+      totalViews,
+    };
+  });
+};
+
 export const postService = {
   createPost,
   getAllPost,
@@ -324,4 +401,5 @@ export const postService = {
   getMyPost,
   updatePost,
   deletePost,
+  getStats,
 };
