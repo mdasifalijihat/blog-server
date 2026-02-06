@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helper/paginationSortingHelper";
+import { UserRole } from "../../middlewares/auth";
+import { boolean } from "better-auth";
 
 // create post
 const createPost = async (req: Request, res: Response) => {
@@ -120,10 +122,12 @@ const updatePost = async (req: Request<{ postId: string }>, res: Response) => {
     }
 
     const { postId } = req.params;
+    const isAdmin = user.role === UserRole.ADMIN;
     const result = await postService.updatePost(
       postId as string,
       req.body,
       user.id,
+      isAdmin
     );
     res.status(201).json(result);
   } catch (error) {
